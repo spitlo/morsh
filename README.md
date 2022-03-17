@@ -33,4 +33,4 @@ IT WAS THE BEST OF TIMES IT WAS THE WORST OF TIMES IT WAS THE AGE OF WISDOM IT W
 - [ ] Fix bugs
 - [ ] Handle other DITs than `.` (`*`)
 - [ ] Support phonetic alphabets?
-- [ ] Remove dots from plain text
+- [x] Remove dots from plain text

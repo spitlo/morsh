@@ -113,9 +113,7 @@ function handle_character() {
       ;;
     [-.])
       # This possibly is a morse code letter
-      if [ "$MODE" == "encode" ]; then
-        echo -n "$character"
-      else
+      if [ "$MODE" == "decode" ]; then
         buffer="$buffer$character"
       fi
       ;;
