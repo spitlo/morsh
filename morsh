@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034,SC2018,SC2019
+set -e
+
+# Colors
+BLUE='\033[1;34m'
+BROWN='\033[0;33m'
+GREEN='\033[1;32m'
+NC='\033[0m'
+YELLOW='\033[1;33m'
+
+# Morse code
+A=".-"
+B="-..."
+C="-.-."
+D="-.."
+E="."
+F="..-."
+G="--."
+H="...."
+I=".."
+J=".---"
+K="-.-"
+L=".-.."
+M="--"
+N="-."
+O="---"
+P=".--."
+Q="--.-"
+R=".-."
+S="..."
+T="-"
+U="..-"
+V="...-"
+W=".--"
+X="-..-"
+Y="-.--"
+Z="--.."
+_0="-----"
+_1=".----"
+_2="..---"
+_3="...--"
+_4="....-"
+_5="....."
+_6="-...."
+_7="--..."
+_8="---.."
+_9="----."
+
+# Defaults
+MODE=""
+
+USAGE="
+${BROWN}Usage${NC}: $0 [ARGUMENTS] [FILE|STRING]
+Encode/decode morse code. The script tries to guess the relevant mode.
+There are three ways to supply input text to this script:
+  ${GREEN}1${NC}) Add a file as argument
+  ${GREEN}2${NC}) Add word or words as arguments
+  ${GREEN}3${NC}) Pipe text to it
+
+${BROWN}Options${NC}:
+  [--encode/-e]       Force encode.
+  [--decode/-d]       Force decode.
+"
+HELP="
+${BROWN}Usage examples${NC}:
+
+"
+
+# A place to store unfinished words in morse
+buffer=""
+
+function handle_morse_character() {
+  morse_character="$1"
+  # Do this until we find a better way
+  # echo "Checking morse character $morse_character"
+  for alpha_character in {A..Z}; do
+    if [ "${!alpha_character}" == "$morse_character" ]; then
+      echo -n "$alpha_character"
+    fi
+  done
+  for num_character in {0..9}; do
+  num_character_name="_$num_character"
+    if [ "${!num_character_name}" == "$morse_character" ]; then
+      echo -n "$num_character"
+    fi
+  done
+}
+
+function handle_character() {
+  character="$1"
+  case "$character" in
+    ""|" ")
+      # Don’t ask me why, but spaces come through as ""
+      if [ "$MODE" == "encode" ]; then
+        echo -n " "
+      else
+        handle_morse_character "$buffer"
+        buffer=""
+      fi
+      ;;
+    [a-zA-Z])
+      # This is a character that can be easily encoded
+      character=$(echo "$character" | tr a-z A-Z)
+      morse_code="${!character}"
+      echo -n "$morse_code "
+      ;;
+    [0-9])
+      # This is a character that can be encoded
+      character_name="_$character"
+      morse_code="${!character_name}"
+      echo -n "$morse_code "
+      ;;
+    [-.])
+      # This possibly is a morse code letter
+      if [ "$MODE" == "encode" ]; then
+        echo -n "$character"
+      else
+        buffer="$buffer$character"
+      fi
+      ;;
+    "/")
+      if [ "$MODE" == "decode" ]; then
+        echo -n " "
+      fi
+      ;;
+    *)
+      # This is one of the characters we don’t transform, print nothing?
+      echo -n " "
+      ;;
+  esac
+}
+
+function handle_line() {
+  line="$1"
+  while read -rn1 character; do
+    handle_character "$character"
+  done < <(echo "$line")
+  echo
+}
+
+argument=""
+
+# Handle args
+for arg in "$@"; do
+  if [ "$arg" = "-d" ] || [ "$arg" = "--decode" ]; then
+    MODE="decode"
+  elif [ "$arg" = "-e" ] || [ "$arg" = "--encode" ]; then
+    MODE="encode"
+  elif [ "$arg" = "help" ] || [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
+    echo -e "$USAGE$HELP"
+    exit 0
+  else
+    # Concatenating this to existing string instead of simply setting it allows us to
+    # accept unquoted sentences as arguments.
+    argument="$argument $arg"
+  fi
+done
+
+# If MODE is still unset, try to guess if we should encode or decode text
+if [ -z "$MODE" ]; then
+  dash_removed=${argument//-}
+  # Bash doesn’t handle decimals, multiply by 100 for better precision
+  diff=$(( ${#dash_removed} * 100 / ${#argument} * 100 ))
+  if [ "$diff" -gt 8000 ]; then
+    # echo -e "I’m guessing this is plain text that you want me to encode.\nIf not, please use a flag to force mode."
+    MODE="encode"
+  else
+    # echo -e "I’m guessing this is morse code that you want me to decode.\nIf not, please use a flag to force mode."
+    MODE="decode"
+  fi
+fi
+
+# Check if input is piped; if so read it character for character. If not,
+# see if argument supplied is a file and read it character for character.
+# If neither of these are true, assume the argument is a string of text.
+trimmed_arguments="${argument// }"
+if [ -t 0 ]; then
+  # If no arguments are supplied, print help and exit
+  if [ "$trimmed_arguments" = "" ]; then
+    echo -e "$USAGE"
+    exit 0
+  fi
+  if [ -f "$trimmed_arguments" ]; then
+    while read -re line; do
+      handle_line "$line"
+    done < <(cat "$trimmed_arguments")
+  else
+    # Last try: Assume this is a string
+    while read -re line; do
+      handle_line "$line"
+    done < <(echo "$argument")
+  fi
+else
+  while IFS= read -re line; do
+    handle_line "$line"
+  done
+fi
+
+echo
