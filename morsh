@@ -93,7 +93,7 @@ function handle_character() {
     ""|" ")
       # Don’t ask me why, but spaces come through as ""
       if [ "$MODE" == "encode" ]; then
-        echo -n " "
+        echo -n "/ "
       else
         handle_morse_character "$buffer"
         buffer=""
