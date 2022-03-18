@@ -2,6 +2,41 @@
 
 A Bash script to decode/encode morse code. Slightly buggy and very, very slow. Could also be used as an extremely unpleasant way to uppercase text.
 
+## Supplying text
+
+There are three ways to supply input text to this script:
+
+  1) Add a file as argument
+  2) Add word or words as arguments
+  3) Pipe text to it
+
+In case 2, the script tries to guess the relevant mode, in other cases specify mode with a flag (see below).
+
+## Options
+
+`-d/--decode` - Takes morse code and outputs plain text
+`-e/--encode` - Takes plain text and outputs morse code
+
+## Usage examples
+
+Quickly decode a message from some ancient online puzzle game:
+
+```bash
+./morsh ...- --- --- -.. --- --- / -- .- --. .. -.-.
+```
+
+Awkwardly uppercase a sentence (removing punctuation and fluff in the process):
+
+```bash
+echo "I Have No Mouth, and I Must Scream" | ./morsh -e | ./morsh -d
+```
+
+Turn Crime and Punishment into something you can reliably broadcast to your entire neighborhood with a simple signal horn and some patience:
+
+```bash
+curl https://gutenberg.org/files/2554/2554-0.txt | ./morsh --encode | less
+```
+
 ## Output examples
 
 ### Input text
@@ -31,6 +66,9 @@ IT WAS THE BEST OF TIMES IT WAS THE WORST OF TIMES IT WAS THE AGE OF WISDOM IT W
 ## Todo
 
 - [ ] Handle spaces when piping
-- [ ] Handle other DITs than `.` (`*`)
+- [ ] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
+- [ ] Move mode guessing to `handle_line` so we can support in with all input models
+- [ ] Convert things like `é` to `e` before encoding
 - [ ] Support phonetic alphabets?
+- [ ] Clean up output text (no traling `/`, no extra newline)
 - [x] Remove dots from plain text

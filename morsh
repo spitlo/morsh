@@ -7,6 +7,7 @@ BLUE='\033[1;34m'
 BROWN='\033[0;33m'
 GREEN='\033[1;32m'
 NC='\033[0m'
+RED="\033[0;31m"
 YELLOW='\033[1;33m'
 
 # Morse code
@@ -52,11 +53,12 @@ MODE=""
 
 USAGE="
 ${BROWN}Usage${NC}: $0 [ARGUMENTS] [FILE|STRING]
-Encode/decode morse code. The script tries to guess the relevant mode.
+Encode/decode morse code.
 There are three ways to supply input text to this script:
   ${GREEN}1${NC}) Add a file as argument
   ${GREEN}2${NC}) Add word or words as arguments
   ${GREEN}3${NC}) Pipe text to it
+In case 2, the script tries to guess the relevant mode, in other cases specify mode with a flag (see below).
 
 ${BROWN}Options${NC}:
   [--encode/-e]       Force encode.
@@ -64,7 +66,14 @@ ${BROWN}Options${NC}:
 "
 HELP="
 ${BROWN}Usage examples${NC}:
+  Quickly decode a message from some ancient online puzzle game:
+  \$ ${BLUE}./morsh ...- --- --- -.. --- --- / -- .- --. .. -.-.${NC}
 
+  Awkwardly uppercase a sentence (removing punctuation and fluff in the process):
+  \$ ${BLUE}echo \"I Have No Mouth, and I Must Scream\" | ./morsh -e | ./morsh -d${NC}
+
+  Turn Crime and Punishment into something you can reliably broadcast to your entire neighborhood with a simple signal horn and some patience:
+  \$ ${BLUE}curl https://gutenberg.org/files/2554/2554-0.txt | ./morsh --encode | less${NC}
 "
 
 # A place to store unfinished words in morse
@@ -157,14 +166,16 @@ done
 
 # If MODE is still unset, try to guess if we should encode or decode text
 if [ -z "$MODE" ]; then
+  if [ ${#argument} == 0 ]; then
+    echo -e "${RED}Error.${NC}\nCould not guess mode. Please supply an argument (${BLUE}-d${NC}/${BLUE}-e${NC})."
+    exit 1
+  fi
   dash_removed=${argument//-}
   # Bash doesn’t handle decimals, multiply by 100 for better precision
   diff=$(( ${#dash_removed} * 100 / ${#argument} * 100 ))
   if [ "$diff" -gt 8000 ]; then
-    # echo -e "I’m guessing this is plain text that you want me to encode.\nIf not, please use a flag to force mode."
     MODE="encode"
   else
-    # echo -e "I’m guessing this is morse code that you want me to decode.\nIf not, please use a flag to force mode."
     MODE="decode"
   fi
 fi
@@ -172,8 +183,8 @@ fi
 # Check if input is piped; if so read it character for character. If not,
 # see if argument supplied is a file and read it character for character.
 # If neither of these are true, assume the argument is a string of text.
-trimmed_arguments="${argument// }"
 if [ -t 0 ]; then
+  trimmed_arguments="${argument// }"
   # If no arguments are supplied, print help and exit
   if [ "$trimmed_arguments" = "" ]; then
     echo -e "$USAGE"
