@@ -15,6 +15,7 @@ In case 2, the script tries to guess the relevant mode, in other cases specify m
 ## Options
 
 `-d/--decode` - Takes morse code and outputs plain text
+
 `-e/--encode` - Takes plain text and outputs morse code
 
 ## Usage examples
