@@ -69,7 +69,7 @@ ${BROWN}Usage examples${NC}:
   Quickly decode a message from some ancient online puzzle game:
   \$ ${BLUE}./morsh ...- --- --- -.. --- --- / -- .- --. .. -.-.${NC}
 
-  Awkwardly uppercase a sentence (removing punctuation and fluff in the process):
+  Awkwardly uppercase a sentence (removing punctuation, diacritics and fluff in the process):
   \$ ${BLUE}echo \"I Have No Mouth, and I Must Scream\" | ./morsh -e | ./morsh -d${NC}
 
   Turn Crime and Punishment into something you can reliably broadcast to your entire neighborhood with a simple signal horn and some patience:
@@ -97,6 +97,20 @@ function guess_mode() {
     else
       MODE="decode"
     fi
+  fi
+}
+
+function clean_line() {
+  local accents="āáǎàåäēéěèīíǐìïōóǒòöūúǔùǖǘǚǜüçñĀÁǍÀÅÄĒÉĚÈĪÍǏÌŌÓǑÒÖŪÚǓÙǕǗǙǛÜÇÑ"
+  local nonaccs="AAAAAAEEEEIIIIIOOOOOUUUUUUUUUCN"
+  line="$1"
+  if [ "$MODE" == "encode" ]; then
+    # Remove some diacritics. This in not perfect, but we can’t rely on iconv
+    # Uppercase the result while we’re at it.
+    echo "$line" | tr "$accents" "$nonaccs$nonaccs"
+  else
+    # Normalize morse code syntax
+    echo "$line" | tr '*' '.'
   fi
 }
 
@@ -165,6 +179,8 @@ function handle_line() {
     is_first_line="no"
     guess_mode "$line"
   fi
+
+  line=$(clean_line "$1")
 
   while read -rn1 character; do
     handle_character "$character"

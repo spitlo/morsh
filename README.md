@@ -26,7 +26,7 @@ Quickly decode a message from some ancient online puzzle game:
 ./morsh ...- --- --- -.. --- --- / -- .- --. .. -.-.
 ```
 
-Awkwardly uppercase a sentence (removing punctuation and fluff in the process):
+Awkwardly uppercase a sentence (removing punctuation, diacritics and fluff in the process):
 
 ```bash
 echo "I Have No Mouth, and I Must Scream" | ./morsh -e | ./morsh -d
@@ -67,9 +67,9 @@ IT WAS THE BEST OF TIMES IT WAS THE WORST OF TIMES IT WAS THE AGE OF WISDOM IT W
 ## Todo
 
 - [ ] Clean up output text (no traling `/`)
-- [ ] Convert things like `é` to `e` before encoding
-- [ ] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
 - [ ] Handle spaces when piping
 - [ ] Support phonetic alphabets?
+- [x] Convert things like `é` to `e` before encoding
+- [x] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
 - [x] Move mode guessing to `handle_line` so we can support it with all input models
 - [x] Remove dots from plain text
