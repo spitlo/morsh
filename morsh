@@ -78,6 +78,27 @@ ${BROWN}Usage examples${NC}:
 
 # A place to store unfinished words in morse
 buffer=""
+# Keep track of progress
+is_first_line="yes"
+
+function guess_mode() {
+  # If MODE is still unset, try to guess if we should encode or decode text
+  line="$1"
+  if [ -z "$MODE" ]; then
+    if [ ${#line} == 0 ]; then
+      echo -e "${RED}Error.${NC}\nCould not guess mode. Please supply an argument (${BLUE}-d${NC}/${BLUE}-e${NC})."
+      exit 1
+    fi
+    dash_removed=${line//-}
+    # Bash doesn’t handle decimals, multiply by 100 for better precision
+    diff=$(( ${#dash_removed} * 100 / ${#line} * 100 ))
+    if [ "$diff" -gt 8000 ]; then
+      MODE="encode"
+    else
+      MODE="decode"
+    fi
+  fi
+}
 
 function handle_morse_character() {
   morse_character="$1"
@@ -140,6 +161,11 @@ function handle_character() {
 
 function handle_line() {
   line="$1"
+  if [ "$is_first_line" == "yes" ]; then
+    is_first_line="no"
+    guess_mode "$line"
+  fi
+
   while read -rn1 character; do
     handle_character "$character"
   done < <(echo "$line")
@@ -163,22 +189,6 @@ for arg in "$@"; do
     argument="$argument $arg"
   fi
 done
-
-# If MODE is still unset, try to guess if we should encode or decode text
-if [ -z "$MODE" ]; then
-  if [ ${#argument} == 0 ]; then
-    echo -e "${RED}Error.${NC}\nCould not guess mode. Please supply an argument (${BLUE}-d${NC}/${BLUE}-e${NC})."
-    exit 1
-  fi
-  dash_removed=${argument//-}
-  # Bash doesn’t handle decimals, multiply by 100 for better precision
-  diff=$(( ${#dash_removed} * 100 / ${#argument} * 100 ))
-  if [ "$diff" -gt 8000 ]; then
-    MODE="encode"
-  else
-    MODE="decode"
-  fi
-fi
 
 # Check if input is piped; if so read it character for character. If not,
 # see if argument supplied is a file and read it character for character.
@@ -205,5 +215,3 @@ else
     handle_line "$line"
   done
 fi
-
-echo

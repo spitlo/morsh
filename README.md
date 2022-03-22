@@ -65,10 +65,10 @@ IT WAS THE BEST OF TIMES IT WAS THE WORST OF TIMES IT WAS THE AGE OF WISDOM IT W
 
 ## Todo
 
-- [ ] Handle spaces when piping
-- [ ] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
-- [ ] Move mode guessing to `handle_line` so we can support in with all input models
+- [ ] Clean up output text (no traling `/`)
 - [ ] Convert things like `é` to `e` before encoding
+- [ ] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
+- [ ] Handle spaces when piping
 - [ ] Support phonetic alphabets?
-- [ ] Clean up output text (no traling `/`, no extra newline)
+- [x] Move mode guessing to `handle_line` so we can support it with all input models
 - [x] Remove dots from plain text
