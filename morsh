@@ -41,7 +41,7 @@ ${BROWN}Usage examples${NC}:
   Quickly decode a message from some ancient online puzzle game:
   \$ ${BLUE}./morsh ...- --- --- -.. --- --- / -- .- --. .. -.-.${NC}
 
-  Awkwardly uppercase a sentence (removing punctuation and fluff in the process):
+  Awkwardly uppercase a sentence (removing punctuation, diacritics and fluff in the process):
   \$ ${BLUE}echo \"I Have No Mouth, and I Must Scream\" | ./morsh -e | ./morsh -d${NC}
 
   Turn Crime and Punishment into something you can reliably broadcast to your entire neighborhood with a simple signal horn and some patience:
@@ -50,6 +50,41 @@ ${BROWN}Usage examples${NC}:
 
 # A place to store unfinished words in morse
 buffer=""
+# Keep track of progress
+is_first_line="yes"
+
+function guess_mode() {
+  # If MODE is still unset, try to guess if we should encode or decode text
+  line="$1"
+  if [ -z "$MODE" ]; then
+    if [ ${#line} == 0 ]; then
+      echo -e "${RED}Error.${NC}\nCould not guess mode. Please supply an argument (${BLUE}-d${NC}/${BLUE}-e${NC})."
+      exit 1
+    fi
+    dash_removed=${line//-}
+    # Bash doesn’t handle decimals, multiply by 100 for better precision
+    diff=$(( ${#dash_removed} * 100 / ${#line} * 100 ))
+    if [ "$diff" -gt 8000 ]; then
+      MODE="encode"
+    else
+      MODE="decode"
+    fi
+  fi
+}
+
+function clean_line() {
+  local accents="āáǎàåäēéěèīíǐìïōóǒòöūúǔùǖǘǚǜüçñĀÁǍÀÅÄĒÉĚÈĪÍǏÌŌÓǑÒÖŪÚǓÙǕǗǙǛÜÇÑ"
+  local nonaccs="AAAAAAEEEEIIIIIOOOOOUUUUUUUUUCN"
+  line="$1"
+  if [ "$MODE" == "encode" ]; then
+    # Remove some diacritics. This in not perfect, but we can’t rely on iconv
+    # Uppercase the result while we’re at it.
+    echo "$line" | tr "$accents" "$nonaccs$nonaccs"
+  else
+    # Normalize morse code syntax
+    echo "$line" | tr '*' '.'
+  fi
+}
 
 function handle_code_character() {
   code_character="$1"
@@ -116,6 +151,13 @@ function handle_character() {
 
 function handle_line() {
   line="$1"
+  if [ "$is_first_line" == "yes" ]; then
+    is_first_line="no"
+    guess_mode "$line"
+  fi
+
+  line=$(clean_line "$1")
+
   while read -rn1 character; do
     handle_character "$character"
   done < <(echo "$line")
@@ -161,22 +203,6 @@ for arg in "$@"; do
     argument="$argument $arg"
   fi
 done
-
-# If MODE is still unset, try to guess if we should encode or decode text
-if [ -z "$MODE" ]; then
-  if [ ${#argument} == 0 ]; then
-    echo -e "${RED}Error.${NC}\nCould not guess mode. Please supply an argument (${BLUE}-d${NC}/${BLUE}-e${NC})."
-    exit 1
-  fi
-  dash_removed=${argument//-}
-  # Bash doesn’t handle decimals, multiply by 100 for better precision
-  diff=$(( ${#dash_removed} * 100 / ${#argument} * 100 ))
-  if [ "$diff" -gt 8000 ]; then
-    MODE="encode"
-  else
-    MODE="decode"
-  fi
-fi
 
 # Load the correct set of characters
 case "$ALPHABET" in
@@ -235,5 +261,3 @@ else
     handle_line "$line"
   done
 fi
-
-echo

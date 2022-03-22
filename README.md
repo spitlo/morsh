@@ -15,6 +15,7 @@ In case 2, the script tries to guess the relevant mode, in other cases specify m
 ## Options
 
 `-d/--decode` - Takes morse code and outputs plain text
+
 `-e/--encode` - Takes plain text and outputs morse code
 
 ## Usage examples
@@ -25,7 +26,7 @@ Quickly decode a message from some ancient online puzzle game:
 ./morsh ...- --- --- -.. --- --- / -- .- --. .. -.-.
 ```
 
-Awkwardly uppercase a sentence (removing punctuation and fluff in the process):
+Awkwardly uppercase a sentence (removing punctuation, diacritics and fluff in the process):
 
 ```bash
 echo "I Have No Mouth, and I Must Scream" | ./morsh -e | ./morsh -d
@@ -65,10 +66,10 @@ IT WAS THE BEST OF TIMES IT WAS THE WORST OF TIMES IT WAS THE AGE OF WISDOM IT W
 
 ## Todo
 
+- [ ] Clean up output text (no traling `/`)
 - [ ] Handle spaces when piping
-- [ ] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
-- [ ] Move mode guessing to `handle_line` so we can support in with all input models
-- [ ] Convert things like `é` to `e` before encoding
 - [ ] Support phonetic alphabets?
-- [ ] Clean up output text (no traling `/`, no extra newline)
+- [x] Convert things like `é` to `e` before encoding
+- [x] Handle other DITs than `.` (`*`) <-- Hey, that’s not very linuxy
+- [x] Move mode guessing to `handle_line` so we can support it with all input models
 - [x] Remove dots from plain text
