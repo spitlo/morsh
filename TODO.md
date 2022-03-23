@@ -49,3 +49,8 @@ Number	Code	      Punctuation	      Code
 8	      ---**	      Parentheses	      -*--*-
 9	      ----*	      Quotation Marks	  *-**-*
 0	      -----
+
+Perhaps do something with this?
+
+<https://en.wikipedia.org/wiki/Cockney_Alphabet>
+  
