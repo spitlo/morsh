@@ -239,14 +239,20 @@ esac
 # see if argument supplied is a file and read it character for character.
 # If neither of these are true, assume the argument is a string of text.
 if [ -t 0 ]; then
+  # Not piped
   trimmed_arguments="${argument// }"
   # If no arguments are supplied, print help and exit
   if [ "$trimmed_arguments" = "" ]; then
     echo -e "$USAGE"
     exit 0
   fi
+  # If this is a file, cat it to handle_line
   if [ -f "$trimmed_arguments" ]; then
     while read -re line; do
+      # The code below work (strip trailing slash) for single lines only, investigate.
+      # If a file has a newline in it, only the first line i s processed.
+      # output=$( handle_line "$line" )
+      # echo "$output" | sed -e 's|\/ $||g'
       handle_line "$line"
     done < <(cat "$trimmed_arguments")
   else
@@ -256,6 +262,7 @@ if [ -t 0 ]; then
     done < <(echo "$argument")
   fi
 else
+  # Piped
   while IFS= read -re line; do
     handle_line "$line"
   done

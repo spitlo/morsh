@@ -4,7 +4,8 @@
 
 Perhaps we want to support phonetic alphabets as well?
 
-http://www.sckans.edu/~sireland/radio/code.html
+<https://en.wikipedia.org/wiki/Allied_military_phonetic_spelling_alphabets>
+<http://www.sckans.edu/~sireland/radio/code.html>
 
 Letter	Morse	  NATO	    English	    American  Italian	      German    	International
 ------- ------- --------- ----------- --------- ------------- ----------- -------------
@@ -53,4 +54,3 @@ Number	Code	      Punctuation	      Code
 Perhaps do something with this?
 
 <https://en.wikipedia.org/wiki/Cockney_Alphabet>
-  
