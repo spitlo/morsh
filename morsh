@@ -21,7 +21,7 @@ ALPHABET_PAI="italian"
 ALPHABET_PAG="german"
 ALPHABET_PAL="international"
 ALPHABET="morse"
-SETS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )/sets" && pwd )
+SETS_DIR=$( cd "$( dirname "$(readlink "$0" || echo "$0")" )/sets" && pwd )
 
 USAGE="
 ${BROWN}Usage${NC}: $0 [ARGUMENTS] [FILE|STRING]
